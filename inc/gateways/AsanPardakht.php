@@ -60,26 +60,27 @@ class AsanPardakht extends Base
 
         // Get Response Body
         $response_body = wp_remote_retrieve_body($response);
-        $json = (json_decode($response_body, true) != null ? json_decode($response_body, true) : (array)$response_body);
+        $json = json_decode($response_body, true);
+        $token = is_string($json) ? $json : (json_last_error() === JSON_ERROR_NONE ? '' : trim($response_body));
 
         // Success
-        if ($status_code == "200" and !empty($response_body)) {
+        if ($status_code == "200" and is_string($token) and $token !== '') {
 
             return $this->success(
                 [
-                    'authority' => $response_body,
+                    'authority' => $token,
                     'redirect' => [
                         'with_post' => true,
                         'url' => 'https://asan.shaparak.ir',
                         'inputs' => [
-                            'RefId' => $response_body
+                            'RefId' => $token
                         ]
                     ]
                 ],
                 [
                     'url' => $url,
                     'body' => $body,
-                    'response' => $json,
+                    'response' => $json ?? $response_body,
                     'header' => $headers,
                 ],
                 $status_code
@@ -87,7 +88,9 @@ class AsanPardakht extends Base
         }
 
         // Setup Errors
-        $error_messages = ($json['error']['message'] ?? $this->get_error_message($status_code));
+        $error_messages = is_array($json)
+            ? ($json['message'] ?? $json['error']['message'] ?? $this->get_error_message($status_code))
+            : $this->get_error_message($status_code);
 
         // Error
         return $this->error(
@@ -357,6 +360,6 @@ class AsanPardakht extends Base
             580 => "error processing special request"
         ];
 
-        return __('Error Code: ', 'parsigate') . $resCode . ($messages[$resCode] ? ' (' . $messages[$resCode] . ')' : '');
+        return __('Error Code: ', 'parsigate') . $resCode . (isset($messages[$resCode]) ? ' (' . $messages[$resCode] . ')' : '');
     }
 }
