@@ -175,7 +175,7 @@ final class VandarTest extends TestCase
 
         $this->assertFalse($result['success']);
         $this->assertSame(
-            'Vandar payment amount or order ID is invalid.',
+            'Vandar payment amount is invalid.',
             $result['message']
         );
     }

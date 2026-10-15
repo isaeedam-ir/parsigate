@@ -188,7 +188,7 @@ class Vandar extends Base
                 $paid_amount < $expected_amount
             ) {
                 return $this->error(
-                    __('Vandar payment amount or order ID is invalid.', 'parsigate'),
+                    __('Vandar payment amount is invalid.', 'parsigate'),
                     [
                         'url' => self::VERIFY_URL,
                         'body' => $this->log_body($body),
